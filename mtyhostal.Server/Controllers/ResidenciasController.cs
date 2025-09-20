@@ -202,7 +202,6 @@ public class ResidenciasController : ControllerBase
     [AllowAnonymous] 
     public async Task<IActionResult> GetResidenciaPorId(int id)
     {
-        //  Buscamos la residencia e incluimos sus datos relacionados
         var residencia = await _context.Residencias
             .Include(r => r.Ciudad)      
             .Include(r => r.Anfitrion)   
@@ -210,13 +209,11 @@ public class ResidenciasController : ControllerBase
             .Where(r => r.IsActive)
             .FirstOrDefaultAsync(r => r.Id == id);
 
-        //  Si no se encuentra, devolvemos un error 404
         if (residencia == null)
         {
             return NotFound("Residencia no encontrada.");
         }
 
-        //  Mapeamos la entidad al DTO para dar forma a la respuesta
         var respuestaDto = new ResidenciaResponseDto
         {
             Id = residencia.Id,
@@ -234,7 +231,6 @@ public class ResidenciasController : ControllerBase
                 Nombre = $"{residencia.Anfitrion.Nombre} {residencia.Anfitrion.ApellidoPaterno}",
                 FotoPerfilUrl = residencia.Anfitrion.FotoPerfilUrl
             },
-            // Mapeamos solo las URLs de las imágenes
             ImagenesUrls = residencia.Imagenes.Select(img => img.Url).ToList()
         };
 
@@ -298,8 +294,6 @@ public class ResidenciasController : ControllerBase
 
         return Ok(new { message = "Residencia actualizada exitosamente." });
     }
-
-    // ... (dentro de la clase ResidenciasController)
 
     [HttpDelete("{id}")]
     [Authorize(Roles = "Anfitrion")]
