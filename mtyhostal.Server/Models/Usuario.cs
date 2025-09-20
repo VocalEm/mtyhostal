@@ -25,12 +25,12 @@ public class Usuario
     [Required]
     public string PasswordHash { get; set; }
     [Required]
-    public RolUsuario Rol { get; set; } // "huesped" o "anfitrion"
+    public RolUsuario Rol { get; set; } 
     public string? FotoPerfilUrl { get; set; } // URL de la imagen en Cloudinary
 
-    // Un usuario (anfitrión) puede tener muchas residencias.
+    public string? FotoPerfilPublicId { get; set; }
+
     public virtual ICollection<Residencia> ResidenciasComoAnfitrion { get; set; } = new List<Residencia>();
 
-    // Un usuario (huésped) puede tener muchas reservaciones.
     public virtual ICollection<Reservacion> ReservacionesComoHuesped { get; set; } = new List<Reservacion>();
 }

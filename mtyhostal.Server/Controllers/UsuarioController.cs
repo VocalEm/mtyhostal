@@ -15,7 +15,6 @@ public class UsuarioController : ControllerBase
     private readonly IConfiguration _configuration;
     private readonly IImageService _imageService; 
 
-    // 2. Modifica el constructor para recibir IConfiguration
     public UsuarioController(ApplicationDbContext context, IConfiguration configuration, IImageService imageService)
     {
         _context = context;
@@ -34,7 +33,7 @@ public class UsuarioController : ControllerBase
 
         var passwordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Password);
 
-        // 3. Lee la URL por defecto desde la configuración
+        // Lee la URL por defecto desde la configuración
         var defaultProfilePicUrl = _configuration["CloudinarySettings:DefaultProfilePictureUrl"];
 
         var nuevoUsuario = new Usuario
@@ -45,7 +44,7 @@ public class UsuarioController : ControllerBase
             Email = usuarioDto.Email,
             PasswordHash = passwordHash,
             Rol = usuarioDto.Rol,
-            FotoPerfilUrl = defaultProfilePicUrl // 4. Asigna la URL por defecto
+            FotoPerfilUrl = defaultProfilePicUrl // Asigna la URL por defecto
         };
 
         _context.Usuarios.Add(nuevoUsuario);
@@ -54,7 +53,9 @@ public class UsuarioController : ControllerBase
         return Ok(new { message = "Usuario registrado exitosamente" });
     }
 
-    [HttpPut("{id}/foto-perfil")]
+    // En UsuarioController.cs
+
+    [HttpPut("{id}/foto-perfil")] // necesitas cambiarlo para que lo haga pidiendo authorization
     public async Task<IActionResult> SubirFotoPerfil(int id, IFormFile file)
     {
         var usuario = await _context.Usuarios.FindAsync(id);
@@ -63,23 +64,31 @@ public class UsuarioController : ControllerBase
             return NotFound("Usuario no encontrado.");
         }
 
-        var imageUrl = await _imageService.UploadImageAsync(file);
-        if (imageUrl == null)
+        // 1. Si el usuario ya tiene una foto, la borramos de Cloudinary primero
+        if (!string.IsNullOrEmpty(usuario.FotoPerfilPublicId))
+        {
+            await _imageService.DeleteImageAsync(usuario.FotoPerfilPublicId);
+        }
+
+        // 2. Subimos la nueva imagen
+        var uploadResult = await _imageService.UploadImageAsync(file);
+        if (uploadResult == null)
         {
             return BadRequest("No se pudo subir la imagen.");
         }
 
-        usuario.FotoPerfilUrl = imageUrl;
+        // 3. Guardamos los nuevos datos de la imagen en la BD
+        usuario.FotoPerfilUrl = uploadResult.Url;
+        usuario.FotoPerfilPublicId = uploadResult.PublicId;
         await _context.SaveChangesAsync();
 
-        return Ok(new { url = imageUrl });
+        return Ok(new { url = uploadResult.Url });
     }
-
 
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(UsuarioLoginDto loginDto)
     {
-        // 1. Buscar al usuario por su email
+        // Buscar al usuario por su email
         var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
         if (usuario == null)
@@ -87,13 +96,13 @@ public class UsuarioController : ControllerBase
             return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
         }
 
-        // 2. Verificar la contraseña
+        // Verificar la contraseña
         if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.PasswordHash))
         {
             return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
         }
 
-        // 3. Si las credenciales son válidas, generar el token JWT
+        // Si las credenciales son válidas, generar el token JWT
         var token = GenerarJwtToken(usuario);
 
         return Ok(new AuthResponseDto { Token = token, EsExitoso = true });
@@ -104,8 +113,7 @@ public class UsuarioController : ControllerBase
     [Authorize] 
     public async Task<IActionResult> GetPerfilUsuario()
     {
-        // Gracias a [Authorize], podemos acceder a la información del usuario
-        // que viene dentro del token JWT a través de User.Claims.
+      
 
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
@@ -123,8 +131,7 @@ public class UsuarioController : ControllerBase
             return NotFound("Usuario no encontrado.");
         }
 
-        // Es una buena práctica usar un DTO para devolver los datos del perfil
-        // y no exponer el modelo de la base de datos directamente.
+
         var perfilDto = new
         {
             usuario.Id,
@@ -146,7 +153,7 @@ public class UsuarioController : ControllerBase
         var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey!));
         var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
-        // Los "claims" son la información que quieres guardar en el token (payload)
+        // Los claims son la información que quieres guardar en el token (payload)
         var claims = new[]
         {
         new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
@@ -156,13 +163,33 @@ public class UsuarioController : ControllerBase
     };
 
         var token = new JwtSecurityToken(
-            // issuer: _configuration["Jwt:Issuer"], // Opcional: Quién emite el token
-            // audience: _configuration["Jwt:Audience"], // Opcional: Para quién es el token
             claims: claims,
-            expires: DateTime.UtcNow.AddHours(1), // Tiempo de expiración del token
+            expires: DateTime.UtcNow.AddHours(1),
             signingCredentials: creds
         );
 
         return new JwtSecurityTokenHandler().WriteToken(token);
+    }
+
+    [HttpPut("perfil")]
+    [Authorize] 
+    public async Task<IActionResult> UpdatePerfil(UsuarioUpdateDto updateDto)
+    {
+        var usuarioId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value);
+
+        var usuario = await _context.Usuarios.FindAsync(usuarioId);
+
+        if (usuario == null)
+        {
+            return NotFound("Usuario no encontrado.");
+        }
+
+        usuario.Nombre = updateDto.Nombre;
+        usuario.ApellidoPaterno = updateDto.ApellidoPaterno;
+        usuario.ApellidoMaterno = updateDto.ApellidoMaterno;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(new { message = "Perfil actualizado exitosamente." });
     }
 }

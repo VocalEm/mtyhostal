@@ -6,6 +6,6 @@
         public string Titulo { get; set; }
         public decimal PrecioPorNoche { get; set; }
         public string CiudadNombre { get; set; }
-        public string? ImagenUrl { get; set; } // La URL de la imagen principal
+        public string? ImagenUrl { get; set; } 
     }
 }

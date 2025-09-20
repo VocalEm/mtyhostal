@@ -14,21 +14,20 @@ public class Residencia
     [Required]
     public decimal PrecioPorNoche { get; set; }
 
-    // Foreign Key para CiudadSede
     [Required]
     public int CiudadSedeId { get; set; }
     [ForeignKey("CiudadSedeId")]
     public CiudadSede Ciudad { get; set; }
 
-    // Foreign Key para el Anfitrión (Usuario)
     [Required]
     public int AnfitrionId { get; set; }
     [ForeignKey("AnfitrionId")]
     public Usuario Anfitrion { get; set; }
-    // Una residencia puede tener muchas imágenes.
     public virtual ICollection<ImagenResidencia> Imagenes { get; set; } = new List<ImagenResidencia>();
 
-    // Una residencia puede tener muchas reservaciones.
     public virtual ICollection<Reservacion> Reservaciones { get; set; } = new List<Reservacion>();
+
+    public bool IsActive { get; set; } = true; // Por defecto, una nueva residencia está activa
+
 
 }

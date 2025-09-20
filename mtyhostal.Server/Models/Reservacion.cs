@@ -15,13 +15,11 @@ public class Reservacion
     [Required]
     public decimal PrecioTotal { get; set; }
 
-    // Foreign Key para Residencia
     [Required]
     public int ResidenciaId { get; set; }
     [ForeignKey("ResidenciaId")]
     public Residencia Residencia { get; set; }
 
-    // Foreign Key para el Huésped (Usuario)
     [Required]
     public int HuespedId { get; set; }
     [ForeignKey("HuespedId")]

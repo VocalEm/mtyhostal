@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using mtyhostal.Server.Interfaces; // Asumo que esta es la ruta a tus interfaces
+using mtyhostal.Server.Interfaces; 
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -17,7 +17,6 @@ builder.Services.AddScoped<IImageService, CloudinaryService>();
 
 builder.Services.AddControllers();
 
-// CORRECCIÓN 1: Usar AddSwaggerGen para la documentación de la API
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -38,12 +37,11 @@ var app = builder.Build();
 
 app.UseDefaultFiles();
 
-// CORRECCIÓN 2: Usar UseStaticFiles para servir los archivos del frontend
+//  Usar UseStaticFiles para servir los archivos del frontend
 app.UseStaticFiles();
 
 if (app.Environment.IsDevelopment())
 {
-    // CORRECCIÓN 1 (continuación): Usar el middleware de Swagger
     app.UseSwagger();
     app.UseSwaggerUI();
 }

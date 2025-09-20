@@ -7,7 +7,6 @@ public class ApplicationDbContext : DbContext
     {
     }
 
-    // Estas propiedades representan las tablas que se crearán en la base de datos.
     public DbSet<Usuario> Usuarios { get; set; }
     public DbSet<CiudadSede> CiudadesSede { get; set; }
     public DbSet<Residencia> Residencias { get; set; }
