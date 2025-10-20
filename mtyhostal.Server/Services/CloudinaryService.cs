@@ -1,6 +1,6 @@
 ﻿using CloudinaryDotNet;
 using CloudinaryDotNet.Actions;
-using mtyhostal.Server.Interfaces; // Asegúrate de que el namespace sea correcto
+using mtyhostal.Server.Interfaces; 
 
 
 public class CloudinaryService : IImageService
@@ -16,7 +16,7 @@ public class CloudinaryService : IImageService
         _cloudinary = new Cloudinary(account);
     }
 
-    // --- CAMBIO 1: El tipo de retorno ahora es ImageUploadResult ---
+    // El tipo de retorno ahora es ImageUploadResult ---
     public async Task<AppImageUploadResult?> UploadImageAsync(IFormFile file)
     {
         if (file == null || file.Length == 0)
@@ -39,7 +39,7 @@ public class CloudinaryService : IImageService
             return null;
         }
 
-        // --- CAMBIO 2: Devolvemos el objeto completo, no solo la URL ---
+        // Devolvemos el objeto completo, no solo la URL 
         return new AppImageUploadResult
         {
             Url = uploadResult.SecureUrl?.ToString(),

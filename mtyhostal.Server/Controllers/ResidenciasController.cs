@@ -25,10 +25,8 @@ public class ResidenciasController : ControllerBase
     [Authorize(Roles = "Anfitrion")] 
     public async Task<IActionResult> CrearResidencia(ResidenciaCreateDto residenciaDto)
     {
-        //  Obtenemos el ID del anfitrión desde el token JWT
         var anfitrionId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value);
 
-        //  Creamos la nueva entidad Residencia
         var nuevaResidencia = new Residencia
         {
             Titulo = residenciaDto.Titulo,
@@ -36,7 +34,7 @@ public class ResidenciasController : ControllerBase
             Direccion = residenciaDto.Direccion,
             PrecioPorNoche = residenciaDto.PrecioPorNoche,
             CiudadSedeId = residenciaDto.CiudadSedeId,
-            AnfitrionId = anfitrionId // Asociamos la residencia con el anfitrión logueado
+            AnfitrionId = anfitrionId 
         };
 
         _context.Residencias.Add(nuevaResidencia);
@@ -100,11 +98,11 @@ public class ResidenciasController : ControllerBase
                 var nuevaImagen = new ImagenResidencia
                 {
                     Url = uploadResult.Url,
-                    PublicId = uploadResult.PublicId, // <-- Guardamos el PublicId
+                    PublicId = uploadResult.PublicId, 
                     ResidenciaId = residenciaId
                 };
                 _context.ImagenesResidencia.Add(nuevaImagen);
-                urlsImagenes.Add(uploadResult.Url); // Guardamos la URL para la respuesta
+                urlsImagenes.Add(uploadResult.Url);
             }
         }
 
@@ -146,7 +144,7 @@ public class ResidenciasController : ControllerBase
         await _context.SaveChangesAsync();
 
         return NoContent(); // 204 No Content es la respuesta estándar para un DELETE exitoso
-    } //Probablemente no sea necesaria por el momento
+    } 
 
 
     [HttpPut("{residenciaId}/imagenes")]
