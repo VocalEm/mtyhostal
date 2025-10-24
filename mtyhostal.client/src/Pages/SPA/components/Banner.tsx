@@ -4,15 +4,11 @@ import { useState } from "react";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 
-const navigation = [
-  { name: "Product", href: "#" },
-  { name: "Features", href: "#" },
-  { name: "Marketplace", href: "#" },
-  { name: "Company", href: "#" },
-];
-
 const bannerImageUrl =
   "https://res.cloudinary.com/dxstpixjr/image/upload/v1760910015/BannerSPA_ey6mfi.png";
+
+const logoImage =
+  "https://res.cloudinary.com/dxstpixjr/image/upload/v1760911746/mtyhostal_logo_dark_apoeqv.png";
 
 export default function Banner() {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
@@ -25,24 +21,25 @@ export default function Banner() {
   };
 
   return (
-    <div className=" bg-gray-900" style={bannerStyle}>
+    <div className="bg-gray-900" style={bannerStyle}>
       <header className="absolute inset-x-0 top-0 z-50">
+        {/* Logo overlay: absolutely positioned so it doesn't take layout space and sits over the nav */}
+        <a
+          href="#"
+          className="absolute left-6 top-1/2 -translate-y-1/2 p-1.5 z-50 block"
+        >
+          <span className="sr-only">Your Company</span>
+          <img
+            alt="MtyHostal logo"
+            src={logoImage}
+            className="mt-8 h-[40px] sm:h-[50px] lg:h-[170px] w-auto"
+          />
+        </a>
         <nav
           aria-label="Global"
-          className="flex items-center justify-between p-6 lg:px-8"
+          className="mt-5 flex items-center justify-between p-6 lg:px-8"
         >
-          <div className="flex lg:flex-1">
-            <a href="#" className="-m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
-              <div className="h-12 w-40 flex items-center justify-center">
-                <img
-                  alt="mtyhostal"
-                  src="https://res.cloudinary.com/dxstpixjr/image/upload/v1760911746/mtyhostal_logo_dark_apoeqv.png"
-                  className="h-40 w-auto object-contain"
-                />
-              </div>
-            </a>
-          </div>
+          <div className="flex lg:flex-1"></div>
           <div className="flex lg:hidden">
             <button
               type="button"
@@ -53,17 +50,7 @@ export default function Banner() {
               <Bars3Icon aria-hidden="true" className="size-6" />
             </button>
           </div>
-          <div className="hidden lg:flex lg:gap-x-12">
-            {navigation.map((item) => (
-              <a
-                key={item.name}
-                href={item.href}
-                className="text-sm/6 font-semibold text-white"
-              >
-                {item.name}
-              </a>
-            ))}
-          </div>
+
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
             <a href="#" className="text-sm/6 font-semibold text-white">
               Log in <span aria-hidden="true">&rarr;</span>
@@ -80,11 +67,7 @@ export default function Banner() {
             <div className="flex items-center justify-between">
               <a href="#" className="-m-1.5 p-1.5">
                 <span className="sr-only">Your Company</span>
-                <img
-                  alt=""
-                  src="https://tailwindcss.com/plus-assets/img/logos/mark.svg?color=indigo&shade=500"
-                  className="h-8 w-auto"
-                />
+                <img alt="" src={bannerImageUrl} className="h-8 w-auto" />
               </a>
               <button
                 type="button"
@@ -97,23 +80,12 @@ export default function Banner() {
             </div>
             <div className="mt-6 flow-root">
               <div className="-my-6 divide-y divide-white/10">
-                <div className="space-y-2 py-6">
-                  {navigation.map((item) => (
-                    <a
-                      key={item.name}
-                      href={item.href}
-                      className="-mx-3 block rounded-lg px-3 py-2 text-base/7 font-semibold text-white hover:bg-white/5"
-                    >
-                      {item.name}
-                    </a>
-                  ))}
-                </div>
                 <div className="py-6">
                   <a
                     href="#"
                     className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-white hover:bg-white/5"
                   >
-                    Log in
+                    Iniciar Sesion
                   </a>
                 </div>
               </div>
@@ -135,30 +107,29 @@ export default function Banner() {
             className="relative left-[calc(50%-11rem)] aspect-1155/678 w-144.5 -translate-x-1/2 rotate-30 bg-gradient-to-tr from-gray-700 to-gray-900 opacity-30 sm:left-[calc(50%-30rem)] sm:w-288.75"
           />
         </div>
-
-        <div className="mx-auto max-w-2xl min-h-[90vh] flex flex-col justify-center py-32 sm:py-48 lg:py-56">
+        <div className="mx-auto max-w-2xl py-32 sm:py-48 lg:py-56">
+          <div className="hidden sm:mb-8 sm:flex sm:justify-center"></div>
           <div className="text-center">
-            <h1 className="text-5xl font-semibold tracking-tight text-balance text-white sm:text-6xl">
-              Hospedaje en Monterrey Nuevo Leon
+            <h1 className="text-5xl font-semibold tracking-tight text-balance text-white sm:text-7xl">
+              Hospedaje en Nuevo Leon
             </h1>
-            <p className="mt-8 text-lg font-medium text-pretty text-white sm:text-xl/8">
-              Disfruta del Mundial 2026 y la cultura Regia eligiendo un
-              hosepdaje a tu medida en el corazon de la ciudad
+            <p className="mt-8 text-lg font-medium text-pretty text-gray-100 sm:text-xl/8">
+              Encuentra tu hogar temporal en la cidudad de las montañas para
+              este mundial 2026.
             </p>
             <div className="mt-10 flex items-center justify-center gap-x-6">
               <a
-                href="#"
-                className="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-indigo-400 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
+                href="/Home"
+                className="rounded-md bg-blue-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-500"
               >
-                Ver Hospedajes
+                Ver Residencias
               </a>
-              <a href="#" className="text-sm/6 font-semibold text-white">
-                Login <span aria-hidden="true">→</span>
+              <a href="/Login" className="text-sm/6 font-semibold text-white">
+                Iniciar Sesion <span aria-hidden="true">→</span>
               </a>
             </div>
           </div>
         </div>
-
         <div
           aria-hidden="true"
           className="absolute inset-x-0 top-[calc(100%-13rem)] -z-10 transform-gpu overflow-hidden blur-3xl sm:top-[calc(100%-30rem)]"

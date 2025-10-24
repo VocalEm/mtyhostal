@@ -1,12 +1,12 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
-using mtyhostal.Server.Interfaces; 
+using mtyhostal.Server.Interfaces;
 using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Configuración de Servicios ---
+// --- Configuraciï¿½n de Servicios ---
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -33,7 +33,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// --- Configuración del Pipeline de HTTP ---
+// --- Configuraciï¿½n del Pipeline de HTTP ---
 
 app.UseDefaultFiles();
 
