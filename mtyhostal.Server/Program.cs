@@ -6,7 +6,22 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// --- Configuraci�n de Servicios ---
+// --- Configuración de CORS ---
+var myAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy(name: myAllowSpecificOrigins,
+                      policy =>
+                      {
+                          // Aquí pones la URL de tu app de React
+                          policy.WithOrigins("https://localhost:61965")
+                                .AllowAnyHeader()
+                                .AllowAnyMethod();
+                      });
+});
+
+// --- Configuracion de Servicios ---
 
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection");
 
@@ -33,7 +48,7 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 
 var app = builder.Build();
 
-// --- Configuraci�n del Pipeline de HTTP ---
+// --- Configuracion del Pipeline de HTTP ---
 
 app.UseDefaultFiles();
 
@@ -47,6 +62,8 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+app.UseCors(myAllowSpecificOrigins);
 
 app.UseAuthentication();
 

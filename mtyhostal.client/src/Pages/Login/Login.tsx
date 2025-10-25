@@ -9,44 +9,76 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
+import { toast } from "sonner";
+import { useAuth } from "@/context/AuthContext";
 
 const Login = () => {
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [errors, setErrors] = useState<{ email?: string; password?: string }>(
-    {}
-  );
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+  });
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [loading, setLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
+  const { login } = useAuth();
 
-  const validateForm = () => {
-    const newErrors: { email?: string; password?: string } = {};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setPasswordError("");
 
-    if (!email) {
-      newErrors.email = "El email es requerido";
-    } else if (!/\S+@\S+\.\S+/.test(email)) {
-      newErrors.email = "Email inválido";
+    if (!formData.password || formData.password.length <= 0) {
+      setPasswordError("Debes ingresar la contraseña");
+      setLoading(false);
+      return;
     }
 
-    if (!password) {
-      newErrors.password = "La contraseña es requerida";
-    } else if (password.length < 6) {
-      newErrors.password = "La contraseña debe tener al menos 6 caracteres";
-    }
+    try {
+      await login(formData.email, formData.password);
+      toast.success("Inicio de sesión exitoso");
+      navigate("/home");
+    } catch (err: any) {
+      const response = err?.response;
+      const data = response?.data;
+      toast.error("Fallo al iniciar sesión");
 
-    setErrors(newErrors);
-    return Object.keys(newErrors).length === 0;
+      if (response?.status === 400 && data && typeof data === "object") {
+        const errorKey = Object.keys(data)[0];
+
+        if (
+          errorKey &&
+          Array.isArray(data[errorKey]) &&
+          data[errorKey].length > 0
+        ) {
+          const errorMessage = data[errorKey][0];
+          toast.error(errorMessage);
+        }
+      }
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
-    if (validateForm()) {
-      // TODO: Implementar llamada a la API de login
-      console.log("Login con:", { email, password });
-    }
+  const imageFondoUrl =
+    "https://res.cloudinary.com/dxstpixjr/image/upload/v1761372206/fondoEstadio_jle8ev.jpg";
+  const fondoStyle: React.CSSProperties = {
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${imageFondoUrl})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100">
+    <div
+      style={fondoStyle}
+      className="flex items-center justify-center min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100"
+    >
       <Card className="w-full max-w-md shadow-lg">
         <CardHeader className="space-y-1">
           <CardTitle className="text-2xl font-bold text-center">
@@ -62,40 +94,41 @@ const Login = () => {
               <Label htmlFor="email">Email</Label>
               <Input
                 id="email"
+                name="email"
                 type="email"
                 placeholder="correo@ejemplo.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className={errors.email ? "border-red-500" : ""}
+                value={formData.email}
+                onChange={handleInputChange}
               />
-              {errors.email && (
-                <p className="text-sm text-red-500">{errors.email}</p>
-              )}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="password">Contraseña</Label>
               <Input
                 id="password"
+                name="password"
                 type="password"
                 placeholder="••••••••"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                className={errors.password ? "border-red-500" : ""}
+                value={formData.password}
+                onChange={handleInputChange}
               />
-              {errors.password && (
-                <p className="text-sm text-red-500">{errors.password}</p>
-              )}
             </div>
+            {passwordError.length > 0 && (
+              <p className="text-red-500 text-sm">{passwordError}</p>
+            )}
 
-            <Button type="submit" className="w-full">
+            <Button
+              type="submit"
+              className="bg-blue-600 hover:bg-blue-500 w-full "
+              disabled={loading}
+            >
               Iniciar Sesión
             </Button>
 
             <div className="text-center text-sm text-gray-600">
               ¿No tienes una cuenta?{" "}
               <a
-                href="/register"
+                href="/Registro"
                 className="text-blue-600 hover:underline font-medium"
               >
                 Regístrate aquí

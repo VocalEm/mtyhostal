@@ -19,9 +19,11 @@ import {
   SlidersHorizontal,
   DollarSign,
 } from "lucide-react";
+import CrearPropiedadDialog from "@/Pages/Perfil/Components/CrearPropiedadDialog";
+import { useAuth } from "@/context/AuthContext";
 
 const logoImage =
-  "https://res.cloudinary.com/dxstpixjr/image/upload/v1760911746/mtyhostal_logo_dark_apoeqv.png";
+  "https://res.cloudinary.com/dxstpixjr/image/upload/v1760911622/mtyhostal_logo_light_ismupz.png";
 
 interface ResidenciaCard {
   id: number;
@@ -32,15 +34,11 @@ interface ResidenciaCard {
 }
 
 const Home = () => {
-  // Estado para simular si hay un usuario en sesión (cambiar por contexto real después)
-  const [user, setUser] = useState<{
-    nombre: string;
-    fotoPerfilUrl?: string;
-  } | null>(null);
+  const { user, logout } = useAuth();
+
   const [searchQuery, setSearchQuery] = useState("");
   const [residencias, setResidencias] = useState<ResidenciaCard[]>([]);
 
-  // Estados para filtros
   const [selectedCiudades, setSelectedCiudades] = useState<string[]>([]);
   const [precioMin, setPrecioMin] = useState<number>(0);
   const [precioMax, setPrecioMax] = useState<number>(10000);
@@ -48,7 +46,6 @@ const Home = () => {
     "menor" | "mayor" | "ninguno"
   >("ninguno");
 
-  // Ciudades disponibles en Nuevo León
   const ciudadesDisponibles = [
     "Monterrey",
     "San Pedro Garza García",
@@ -60,9 +57,7 @@ const Home = () => {
     "García",
   ];
 
-  // Datos de ejemplo (reemplazar con API call después)
   useEffect(() => {
-    // TODO: Implementar llamada a la API para obtener residencias
     const mockResidencias: ResidenciaCard[] = [
       {
         id: 1,
@@ -71,14 +66,6 @@ const Home = () => {
         ciudadNombre: "San Pedro Garza García",
         imagenUrl:
           "https://images.unsplash.com/photo-1568605114967-8130f3a36994?w=500",
-      },
-      {
-        id: 2,
-        titulo: "Departamento moderno en Monterrey Centro",
-        precioPorNoche: 800,
-        ciudadNombre: "Monterrey",
-        imagenUrl:
-          "https://images.unsplash.com/photo-1502672260066-6bc2a9d2c953?w=500",
       },
       {
         id: 3,
@@ -117,9 +104,8 @@ const Home = () => {
   }, []);
 
   const handleLogout = () => {
-    // TODO: Implementar logout real
-    setUser(null);
-    console.log("Cerrando sesión...");
+    logout();
+    window.location.href = "/";
   };
 
   const toggleCiudad = (ciudad: string) => {
@@ -140,19 +126,16 @@ const Home = () => {
 
   const filteredResidencias = residencias
     .filter((residencia) => {
-      // Filtro de búsqueda por texto
       const matchesSearch =
         residencia.titulo.toLowerCase().includes(searchQuery.toLowerCase()) ||
         residencia.ciudadNombre
           .toLowerCase()
           .includes(searchQuery.toLowerCase());
 
-      // Filtro por ciudades seleccionadas
       const matchesCiudad =
         selectedCiudades.length === 0 ||
         selectedCiudades.includes(residencia.ciudadNombre);
 
-      // Filtro por rango de precio
       const matchesPrecio =
         residencia.precioPorNoche >= precioMin &&
         residencia.precioPorNoche <= precioMax;
@@ -167,25 +150,26 @@ const Home = () => {
       }
       return 0;
     });
+  const imageFondoUrl =
+    "https://res.cloudinary.com/dxstpixjr/image/upload/v1761372206/fondoEstadio_jle8ev.jpg";
+  const fondoStyle: React.CSSProperties = {
+    backgroundImage: `linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(${imageFondoUrl})`,
+    backgroundSize: "cover",
+    backgroundPosition: "center",
+    backgroundRepeat: "no-repeat",
+  };
 
   return (
     <div className="min-h-screen bg-gray-50">
-      {/* Header */}
       <header className="bg-white border-b border-gray-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex items-center justify-between h-20 gap-4">
-            {/* Logo */}
             <div className="flex-shrink-0">
               <a href="/">
-                <img
-                  src={logoImage}
-                  alt="MtyHostal"
-                  className="h-12 sm:h-16 w-auto"
-                />
+                <img src={logoImage} alt="MtyHostal" className="h-40 pt-3" />
               </a>
             </div>
 
-            {/* Centered Search Bar - Hidden on mobile */}
             <div className="hidden lg:flex flex-1 justify-center">
               <div className="w-full max-w-2xl">
                 <div className="relative">
@@ -200,48 +184,55 @@ const Home = () => {
                 </div>
               </div>
             </div>
-            {/* User Menu / Login Button */}
             <div className="flex items-center space-x-2 flex-shrink-0">
               {user ? (
-                // Usuario autenticado
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <button className="flex items-center space-x-2 border border-gray-300 rounded-full py-2 px-3 hover:shadow-md transition-shadow">
-                      <Menu className="h-5 w-5 text-gray-600" />
-                      <Avatar className="h-8 w-8">
-                        <AvatarImage
-                          src={user.fotoPerfilUrl}
-                          alt={user.nombre}
-                        />
-                        <AvatarFallback>{user.nombre[0]}</AvatarFallback>
-                      </Avatar>
-                    </button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem>
-                      <a href="/perfil" className="w-full">
-                        Mi Perfil
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <a href="/mis-reservaciones" className="w-full">
-                        Mis Reservaciones
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <a href="/mis-residencias" className="w-full">
-                        Mis Residencias
-                      </a>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem
-                      onClick={handleLogout}
-                      className="text-red-600"
-                    >
-                      Cerrar Sesión
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <>
+                  {user.rol === 0 && <CrearPropiedadDialog />}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <button className="flex items-center space-x-2 border border-gray-300 rounded-full py-2 px-3 hover:shadow-md transition-shadow">
+                        <Menu className="h-5 w-5 text-gray-600" />
+                        <Avatar className="h-8 w-8">
+                          <AvatarImage
+                            src={user.fotoPerfilUrl}
+                            alt={user.nombre}
+                          />
+                          <AvatarFallback>{user.nombre[0]}</AvatarFallback>
+                        </Avatar>
+                      </button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end" className="w-56">
+                      <DropdownMenuItem>
+                        <a href="/perfil" className="w-full">
+                          Mi Perfil
+                        </a>
+                      </DropdownMenuItem>
+
+                      {user.rol === 1 && (
+                        <DropdownMenuItem>
+                          <a href="/Reservaciones/usuario" className="w-full">
+                            Mis Reservaciones
+                          </a>
+                        </DropdownMenuItem>
+                      )}
+                      {user.rol === 0 && (
+                        <DropdownMenuItem>
+                          <a href="/mis-propiedades" className="w-full">
+                            Mis Propiedades
+                          </a>
+                        </DropdownMenuItem>
+                      )}
+
+                      <DropdownMenuSeparator />
+                      <DropdownMenuItem
+                        onClick={handleLogout}
+                        className="text-red-600"
+                      >
+                        Cerrar Sesión
+                      </DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </>
               ) : (
                 // Usuario no autenticado
                 <div className="flex items-center space-x-2">
@@ -260,7 +251,6 @@ const Home = () => {
             </div>
           </div>
 
-          {/* Mobile Search Bar */}
           <div className="lg:hidden pb-4">
             <div className="relative w-full">
               <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
@@ -276,8 +266,10 @@ const Home = () => {
         </div>
       </header>
 
-      {/* Hero Section */}
-      <div className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16">
+      <div
+        style={fondoStyle}
+        className="bg-gradient-to-r from-blue-600 to-indigo-700 text-white py-16"
+      >
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
           <h1 className="text-4xl sm:text-5xl font-bold mb-4">
             Hospedaje en Nuevo León
@@ -288,11 +280,8 @@ const Home = () => {
         </div>
       </div>
 
-      {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
-        {/* Filters Bar */}
         <div className="mb-8 flex flex-wrap items-center gap-3">
-          {/* Filtro de Municipios */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -320,7 +309,6 @@ const Home = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Filtro de Precio */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -369,7 +357,6 @@ const Home = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Ordenamiento */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="outline" className="gap-2">
@@ -397,7 +384,6 @@ const Home = () => {
             </DropdownMenuContent>
           </DropdownMenu>
 
-          {/* Limpiar Filtros */}
           {(selectedCiudades.length > 0 ||
             precioMin > 0 ||
             precioMax < 10000 ||
@@ -413,7 +399,6 @@ const Home = () => {
           )}
         </div>
 
-        {/* Results Count */}
         <div className="mb-6">
           <h2 className="text-2xl font-semibold text-gray-900">
             {filteredResidencias.length > 0
@@ -431,13 +416,11 @@ const Home = () => {
           )}
         </div>
 
-        {/* Properties Grid */}
         {filteredResidencias.length > 0 ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {filteredResidencias.map((residencia) => (
-              <a key={residencia.id} href={`/property`} className="block">
+              <a key={residencia.id} href={`/Propiedad`} className="block">
                 <Card className="overflow-hidden hover:shadow-xl transition-shadow duration-300 cursor-pointer group">
-                  {/* Image */}
                   <div className="relative h-64 overflow-hidden bg-gray-200">
                     <img
                       src={
@@ -449,7 +432,6 @@ const Home = () => {
                     />
                   </div>
 
-                  {/* Content */}
                   <CardContent className="p-4">
                     <div className="flex items-start justify-between mb-2">
                       <h3 className="font-semibold text-gray-900 line-clamp-2 flex-1">
@@ -488,7 +470,6 @@ const Home = () => {
         )}
       </main>
 
-      {/* Footer */}
       <footer className="bg-gray-100 border-t border-gray-200 mt-16">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center text-gray-600">

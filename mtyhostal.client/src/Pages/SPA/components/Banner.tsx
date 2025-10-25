@@ -52,8 +52,8 @@ export default function Banner() {
           </div>
 
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <a href="#" className="text-sm/6 font-semibold text-white">
-              Log in <span aria-hidden="true">&rarr;</span>
+            <a href="/Registro" className="text-sm/6 font-semibold text-white">
+              Registrarse <span aria-hidden="true">&rarr;</span>
             </a>
           </div>
         </nav>

@@ -4,7 +4,7 @@ import axios from "axios";
 const api = axios.create({
   // Asegúrate de que esta URL coincida con la URL 'https'
   // de tu backend en el archivo launchSettings.json
-  baseURL: "https://localhost:7233",
+  baseURL: "https://localhost:7233/api",
 });
 
 // 2. CONFIGURA EL INTERCEPTOR PARA ENVIAR EL JWT

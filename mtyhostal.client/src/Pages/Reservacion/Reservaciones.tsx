@@ -44,7 +44,6 @@ interface ReservationFormData {
   telefono: string;
   email: string;
   notasEspeciales: string;
-  // Datos de pago
   numeroTarjeta: string;
   nombreTarjeta: string;
   fechaExpiracion: string;
@@ -64,9 +63,8 @@ interface FormErrors {
 }
 
 const Reservation = () => {
-  // Estado para la propiedad (reemplazar con datos reales de la API)
   const [propiedad, setPropiedad] = useState<Residencia | null>(null);
-  const [currentStep, setCurrentStep] = useState(1); // 1: Fechas, 2: Detalles, 3: Pago, 4: Confirmación
+  const [currentStep, setCurrentStep] = useState(1);
   const [isProcessing, setIsProcessing] = useState(false);
   const [errors, setErrors] = useState<FormErrors>({});
 
@@ -84,9 +82,7 @@ const Reservation = () => {
     cvv: "",
   });
 
-  // Cargar datos de la propiedad
   useEffect(() => {
-    // TODO: Obtener ID de la URL y cargar datos de la propiedad desde la API
     const mockPropiedad: Residencia = {
       id: 1,
       titulo: "Hermosa casa moderna en San Pedro",
@@ -146,11 +142,11 @@ const Reservation = () => {
   };
 
   const calculateServiceFee = () => {
-    return calculateSubtotal() * 0.1; // 10% comisión
+    return calculateSubtotal() * 0.1;
   };
 
   const calculateCleaningFee = () => {
-    return 300; // Tarifa fija de limpieza
+    return 300;
   };
 
   const calculateTotal = () => {
@@ -255,7 +251,6 @@ const Reservation = () => {
 
     setIsProcessing(true);
 
-    // TODO: Implementar llamada a la API para crear la reservación
     console.log("Creando reservación:", {
       residenciaId: propiedad?.id,
       fechaInicio: formData.fechaInicio,
@@ -268,7 +263,6 @@ const Reservation = () => {
       precioTotal: calculateTotal(),
     });
 
-    // Simular proceso de pago
     setTimeout(() => {
       setIsProcessing(false);
       setCurrentStep(4);
@@ -291,7 +285,6 @@ const Reservation = () => {
   const cleaningFee = calculateCleaningFee();
   const total = calculateTotal();
 
-  // Step 4: Confirmación
   if (currentStep === 4) {
     return (
       <div className="min-h-screen bg-gray-50 py-8">
@@ -387,7 +380,6 @@ const Reservation = () => {
   return (
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        {/* Header */}
         <Button
           variant="ghost"
           onClick={() => (window.location.href = `/property`)}
@@ -397,7 +389,6 @@ const Reservation = () => {
           Volver a la propiedad
         </Button>
 
-        {/* Progress Steps */}
         <div className="mb-8">
           <div className="flex items-center justify-center">
             {[1, 2, 3].map((step) => (
@@ -455,7 +446,6 @@ const Reservation = () => {
         </div>
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-          {/* Main Content */}
           <div className="lg:col-span-2">
             <Card>
               <CardHeader>
@@ -472,7 +462,6 @@ const Reservation = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                {/* Step 1: Dates and Guests */}
                 {currentStep === 1 && (
                   <div className="space-y-6">
                     <div>
@@ -569,7 +558,6 @@ const Reservation = () => {
                   </div>
                 )}
 
-                {/* Step 2: Guest Information */}
                 {currentStep === 2 && (
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -650,7 +638,6 @@ const Reservation = () => {
                   </div>
                 )}
 
-                {/* Step 3: Payment Information */}
                 {currentStep === 3 && (
                   <div className="space-y-4">
                     <div className="space-y-2">
@@ -762,7 +749,6 @@ const Reservation = () => {
                   </div>
                 )}
 
-                {/* Navigation Buttons */}
                 <div className="flex gap-3 mt-8 pt-6 border-t">
                   {currentStep > 1 && (
                     <Button variant="outline" onClick={handleBack}>
@@ -790,7 +776,6 @@ const Reservation = () => {
             </Card>
           </div>
 
-          {/* Sidebar - Booking Summary */}
           <div className="lg:col-span-1">
             <div className="sticky top-8">
               <Card>
@@ -800,7 +785,6 @@ const Reservation = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  {/* Property Info */}
                   <div className="flex gap-3">
                     {propiedad.imagenUrl && (
                       <img
@@ -822,7 +806,6 @@ const Reservation = () => {
 
                   <Separator />
 
-                  {/* Dates and Guests */}
                   {formData.fechaInicio && formData.fechaFin && (
                     <>
                       <div className="space-y-2 text-sm">
@@ -848,7 +831,6 @@ const Reservation = () => {
 
                       <Separator />
 
-                      {/* Price Breakdown */}
                       <div className="space-y-2 text-sm">
                         <div className="flex justify-between">
                           <span className="text-gray-600">
@@ -888,7 +870,6 @@ const Reservation = () => {
                     </>
                   )}
 
-                  {/* Host Info */}
                   {propiedad.anfitrion && (
                     <>
                       <Separator />

@@ -13,7 +13,7 @@ public class UsuarioController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
     private readonly IConfiguration _configuration;
-    private readonly IImageService _imageService; 
+    private readonly IImageService _imageService;
 
     public UsuarioController(ApplicationDbContext context, IConfiguration configuration, IImageService imageService)
     {
@@ -26,35 +26,53 @@ public class UsuarioController : ControllerBase
     [HttpPost("registro")]
     public async Task<IActionResult> RegistrarUsuario(UsuarioRegisterDto usuarioDto)
     {
-        if (await _context.Usuarios.AnyAsync(u => u.Email == usuarioDto.Email))
+
+        if (!ModelState.IsValid)
         {
-            return BadRequest("El correo electrónico ya está en uso.");
+            return BadRequest(ModelState);
         }
 
-        var passwordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Password);
-
-        var defaultProfilePicUrl = _configuration["CloudinarySettings:DefaultProfilePictureUrl"];
-
-        var nuevoUsuario = new Usuario
+        try
         {
-            Nombre = usuarioDto.Nombre,
-            ApellidoPaterno = usuarioDto.ApellidoPaterno,
-            ApellidoMaterno = usuarioDto.ApellidoMaterno,
-            Email = usuarioDto.Email,
-            PasswordHash = passwordHash,
-            Rol = usuarioDto.Rol,
-            FotoPerfilUrl = defaultProfilePicUrl 
-        };
+            if (await _context.Usuarios.AnyAsync(u => u.Email == usuarioDto.Email))
+            {
+                ModelState.AddModelError("Email", "El correo electrónico ya está en uso.");
+                return BadRequest(ModelState);
+            }
 
-        _context.Usuarios.Add(nuevoUsuario);
-        await _context.SaveChangesAsync();
+            var passwordHash = BCrypt.Net.BCrypt.HashPassword(usuarioDto.Password);
 
-        return Ok(new { message = "Usuario registrado exitosamente" });
+            var defaultProfilePicUrl = _configuration["CloudinarySettings:DefaultProfilePictureUrl"];
+
+            var nuevoUsuario = new Usuario
+            {
+                Nombre = usuarioDto.Nombre,
+                ApellidoPaterno = usuarioDto.ApellidoPaterno,
+                ApellidoMaterno = usuarioDto.ApellidoMaterno,
+                Email = usuarioDto.Email,
+                PasswordHash = passwordHash,
+                Rol = usuarioDto.Rol,
+                FotoPerfilUrl = defaultProfilePicUrl
+            };
+
+            _context.Usuarios.Add(nuevoUsuario);
+            await _context.SaveChangesAsync();
+
+            return Ok(new { message = "Usuario registrado exitosamente" });
+        }
+        catch (DbUpdateException dbEx)
+        {
+            return StatusCode(500, new { message = "Error al guardar en la base de datos. Intente de nuevo." + dbEx });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Ocurrió un error inesperado en el servidor." + ex });
+        }
     }
 
-    
 
-    [HttpPut("{id}/foto-perfil")] 
+
+    [HttpPut("{id}/foto-perfil")]
     public async Task<IActionResult> SubirFotoPerfil(int id, IFormFile file)
     {
         var usuario = await _context.Usuarios.FindAsync(id);
@@ -87,29 +105,45 @@ public class UsuarioController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<AuthResponseDto>> Login(UsuarioLoginDto loginDto)
     {
-        var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
 
-        if (usuario == null)
+        if (!ModelState.IsValid)
         {
-            return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
+            return BadRequest(ModelState);
         }
-
-        if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.PasswordHash))
+        try
         {
-            return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
+            var usuario = await _context.Usuarios.FirstOrDefaultAsync(u => u.Email == loginDto.Email);
+
+            if (usuario == null)
+            {
+                return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(loginDto.Password, usuario.PasswordHash))
+            {
+                return Unauthorized(new AuthResponseDto { EsExitoso = false, MensajeError = "Credenciales inválidas." });
+            }
+
+            var token = GenerarJwtToken(usuario);
+
+            return Ok(new AuthResponseDto { Token = token, EsExitoso = true });
         }
-
-        var token = GenerarJwtToken(usuario);
-
-        return Ok(new AuthResponseDto { Token = token, EsExitoso = true });
+        catch (DbUpdateException dbEx)
+        {
+            return StatusCode(500, new { message = "Error al guardar en la base de datos. Intente de nuevo." + dbEx });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new { message = "Ocurrió un error inesperado en el servidor." + ex });
+        }
     }
 
     // GET api/usuario/perfil
     [HttpGet("perfil")]
-    [Authorize] 
+    [Authorize]
     public async Task<IActionResult> GetPerfilUsuario()
     {
-      
+
 
         var userIdClaim = User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier);
         if (userIdClaim == null)
@@ -152,7 +186,7 @@ public class UsuarioController : ControllerBase
         {
         new Claim(JwtRegisteredClaimNames.Sub, usuario.Id.ToString()),
         new Claim(JwtRegisteredClaimNames.Email, usuario.Email),
-        new Claim(ClaimTypes.Role, usuario.Rol.ToString()), 
+        new Claim(ClaimTypes.Role, usuario.Rol.ToString()),
         new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString())
     };
 
@@ -166,7 +200,7 @@ public class UsuarioController : ControllerBase
     }
 
     [HttpPut("perfil")]
-    [Authorize] 
+    [Authorize]
     public async Task<IActionResult> UpdatePerfil(UsuarioUpdateDto updateDto)
     {
         var usuarioId = int.Parse(User.Claims.FirstOrDefault(c => c.Type == ClaimTypes.NameIdentifier)!.Value);
