@@ -1,4 +1,5 @@
 # mtyhostal
+Jose Emiliano Frias Felix #1962531
 
 Este proyecto utiliza .net y react con Typescript, para el tema de multimedia utiliza un file system en cloudinary con la capa gratuita. Tambien utiliza el ORM entityFramework de .Net
 
